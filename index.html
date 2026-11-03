@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CryptoFile</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="dark">
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="logo">🔐</div>
+        <div class="brand-text">
+          <h1>CryptoFile</h1>
+          <p>AES-256-GCM</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-label">Операции</div>
+          <button type="button" class="nav-item active" data-tab="encrypt">
+            <span class="nav-icon">🔒</span>
+            <span class="nav-text">Зашифровать</span>
+          </button>
+          <button type="button" class="nav-item" data-tab="decrypt">
+            <span class="nav-icon">🔓</span>
+            <span class="nav-text">Расшифровать</span>
+          </button>
+        </div>
+        <div class="nav-section">
+          <div class="nav-label">Активность</div>
+          <button type="button" class="nav-item" data-tab="history">
+            <span class="nav-icon">📋</span>
+            <span class="nav-text">История</span>
+          </button>
+        </div>
+        <div class="nav-section">
+          <div class="nav-label">Справка</div>
+          <button type="button" class="nav-item" data-tab="about">
+            <span class="nav-icon">ℹ️</span>
+            <span class="nav-text">О проекте</span>
+          </button>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button type="button" class="nav-item theme-btn" id="theme-toggle">
+          <span class="nav-icon" id="theme-icon">🌙</span>
+          <span class="nav-text" id="theme-text">Тёмная тема</span>
+        </button>
+        <div class="sidebar-hint">
+          <div class="hint-icon">🔒</div>
+          <div class="hint-text">Все данные шифруются локально в браузере</div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <!-- ШИФРОВАНИЕ -->
+      <div class="page active" id="page-encrypt">
+        <div class="page-header">
+          <div>
+            <h2>Зашифровать файлы</h2>
+            <p>Защитите файлы с помощью AES-256-GCM</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h3>Способ защиты</h3></div>
+          <div class="mode-grid">
+            <label class="mode-card">
+              <input type="radio" name="key-mode" value="random" checked>
+              <div class="mode-inner">
+                <div class="mode-icon">🎲</div>
+                <div class="mode-title">Случайный код</div>
+                <div class="mode-desc">Генерируется автоматически</div>
+              </div>
+            </label>
+            <label class="mode-card">
+              <input type="radio" name="key-mode" value="password">
+              <div class="mode-inner">
+                <div class="mode-icon">🔑</div>
+                <div class="mode-title">Пароль</div>
+                <div class="mode-desc">Введите свой пароль</div>
+              </div>
+            </label>
+          </div>
+          <div id="password-box" class="password-fields" style="display:none">
+            <input type="password" id="enc-password" placeholder="Пароль (минимум 8 символов)">
+            <input type="password" id="enc-password2" placeholder="Повторите пароль">
+          </div>
+        </div>
+
+        <div class="hero-zone" id="enc-drop" role="button" tabindex="0">
+          <div class="hero-content">
+            <div class="hero-icon">📁</div>
+            <h3>Перетащите файлы сюда</h3>
+            <p>или нажмите, чтобы выбрать</p>
+            <div class="hero-hint">Поддерживается несколько файлов</div>
+          </div>
+        </div>
+        <input type="file" id="enc-file" class="visually-hidden" multiple>
+
+        <div class="file-list" id="enc-list"></div>
+
+        <button type="button" class="action-btn primary" id="enc-btn" disabled>
+          <span>🔒</span> Зашифровать
+        </button>
+
+        <div id="enc-result" style="display:none" class="result-card">
+          <div class="result-header">
+            <div class="result-title"><span class="success-dot"></span>Код для расшифровки</div>
+            <button type="button" class="chip" id="copy-code">📋 Копировать</button>
+          </div>
+          <code id="enc-code"></code>
+          <div class="warning-inline">⚠️ Сохраните код. Без него файлы не восстановить.</div>
+        </div>
+
+        <div class="status" id="enc-status"></div>
+      </div>
+
+      <!-- РАСШИФРОВКА -->
+      <div class="page" id="page-decrypt">
+        <div class="page-header">
+          <div>
+            <h2>Расшифровать файлы</h2>
+            <p>Восстановите файлы с помощью кода или пароля</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h3>Способ расшифровки</h3></div>
+          <div class="mode-grid">
+            <label class="mode-card">
+              <input type="radio" name="dec-mode" value="random" checked>
+              <div class="mode-inner">
+                <div class="mode-icon">🎲</div>
+                <div class="mode-title">Код</div>
+                <div class="mode-desc">Использовать код доступа</div>
+              </div>
+            </label>
+            <label class="mode-card">
+              <input type="radio" name="dec-mode" value="password">
+              <div class="mode-inner">
+                <div class="mode-icon">🔑</div>
+                <div class="mode-title">Пароль</div>
+                <div class="mode-desc">Введите пароль</div>
+              </div>
+            </label>
+          </div>
+          <div id="dec-code-box" class="password-fields" style="display:block">
+            <textarea id="dec-code" rows="2" placeholder="Вставьте код для расшифровки..."></textarea>
+          </div>
+          <div id="dec-password-box" class="password-fields" style="display:none">
+            <input type="password" id="dec-password" placeholder="Введите пароль">
+          </div>
+        </div>
+
+        <div class="hero-zone secondary" id="dec-drop" role="button" tabindex="0">
+          <div class="hero-content">
+            <div class="hero-icon">🔓</div>
+            <h3>Перетащите файлы .enc сюда</h3>
+            <p>или нажмите, чтобы выбрать</p>
+            <div class="hero-hint">Файлы будут восстановлены в исходном виде</div>
+          </div>
+        </div>
+        <input type="file" id="dec-file" class="visually-hidden" multiple>
+
+        <div class="file-list" id="dec-list"></div>
+
+        <button type="button" class="action-btn success" id="dec-btn" disabled>
+          <span>🔓</span> Расшифровать
+        </button>
+
+        <div class="status" id="dec-status"></div>
+      </div>
+
+      <!-- ИСТОРИЯ -->
+      <div class="page" id="page-history">
+        <div class="page-header">
+          <div>
+            <h2>История операций</h2>
+            <p>Последние зашифрованные и расшифрованные файлы</p>
+          </div>
+          <button type="button" class="chip danger" id="clear-history">🗑️ Очистить</button>
+        </div>
+        <div class="history-list" id="history-list">
+          <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <h3>История пуста</h3>
+            <p>Здесь появятся ваши операции</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- О ПРОЕКТЕ -->
+      <div class="page" id="page-about">
+        <div class="page-header">
+          <div>
+            <h2>О проекте</h2>
+            <p>Как работает шифрование и почему это безопасно</p>
+          </div>
+        </div>
+
+        <div class="about-grid">
+          <div class="about-card">
+            <div class="about-icon">🛡️</div>
+            <h3>Алгоритм AES-256-GCM</h3>
+            <p>Используется стандарт <b>AES</b> (Advanced Encryption Standard) с длиной ключа <b>256 бит</b>. Режим <b>GCM</b> (Galois/Counter Mode) обеспечивает не только конфиденциальность, но и проверку целостности данных.</p>
+          </div>
+
+          <div class="about-card">
+            <div class="about-icon">🔑</div>
+            <h3>Как создаются ключи</h3>
+            <p>В режиме <b>«Случайный код»</b> ключ генерируется через <code>crypto.getRandomValues</code> — криптографически стойкий генератор случайных чисел. В режиме <b>«Пароль»</b> используется <b>PBKDF2</b> с 310 000 итераций SHA-256.</p>
+          </div>
+
+          <div class="about-card">
+            <div class="about-icon">🌐</div>
+            <h3>100% локально</h3>
+            <p>Файлы <b>никогда не покидают ваш браузер</b>. Всё шифрование и расшифровка происходит на вашем устройстве через <b>Web Crypto API</b>. Нет серверов, нет передачи данных по сети.</p>
+          </div>
+
+          <div class="about-card">
+            <div class="about-icon">🧩</div>
+            <h3>Структура файла</h3>
+            <p>Зашифрованный <code>.enc</code> файл содержит: <b>12 байт IV</b> (вектор инициализации) + <b>16 байт соли</b> + зашифрованные метаданные (имя файла) и сами данные с тегом аутентификации.</p>
+          </div>
+
+          <div class="about-card">
+            <div class="about-icon">⚠️</div>
+            <h3>Важно помнить</h3>
+            <p><b>Код = ключ.</b> Кто получил код — расшифрует файл. <b>Потеря кода = потеря данных</b> навсегда. Нет «восстановления пароля» — это математически невозможно без ключа.</p>
+          </div>
+
+          <div class="about-card">
+            <div class="about-icon">🚀</div>
+            <h3>Технологии</h3>
+            <p>Чистый <b>HTML/CSS/JS</b> без зависимостей. Работает офлайн в любом современном браузере. Требует HTTPS или localhost, так как Web Crypto не активен на <code>file://</code>.</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="global-error" class="status error" style="display:none"></div>
+    </main>
+  </div> 
+  <script src="script.js"></script>
+</body>
+</html>
